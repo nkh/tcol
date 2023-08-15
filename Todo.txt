@@ -1,0 +1,13 @@
+
+write README.md and online help
+
+document -e user_colors=file usage
+
+extract color when ansi other than colors is in the lines
+
+bg/fg colors parsed
+	from input on the left side
+	and fzf input
+
+put modification colors in array
+

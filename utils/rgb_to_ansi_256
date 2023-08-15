@@ -1,0 +1,8 @@
+
+while read r g b
+	do
+		(( number = 16 + (36 * (r * 5 / 256)) + (6 * (g * 5 / 256)) + (b * 5 / 256) ))
+		printf "%3s \e[48;5;${number}m   \e[m %3d %3d %3d\n" $number $r $g $b
+	done
+
+# vim: set ft=bash:

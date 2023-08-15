@@ -1,0 +1,332 @@
+
+bind custom	tcol	j	move_down		"scroll down"
+bind custom	tcol	DOWN	move_down		"scroll down"
+bind custom	tcol	UP	move_up 		"scroll up"
+bind custom	tcol	k	move_up 		"scroll up"
+bind custom	tcol	RIGHT	move_right		"move right"
+bind custom	tcol	l	move_right		"move right"
+bind custom	tcol	LEFT	move_left		"move left"
+bind custom	tcol	h	move_left		"move left"
+
+bind custom	tcol	Q	quit_no_output		"quit without displaying color data"
+bind custom	tcol	q	quit			"quit"
+
+bind custom	tcol	b	pick_background		"pick background"
+bind custom	tcol	f	pick_foreground		"pick foreground"
+bind custom	tcol	R	reverse_colors		"reverse"
+bind custom	tcol	s1	save_colors_1		"save #1"
+bind custom	tcol	s2	save_colors_2		"save #2"
+bind custom	tcol	s3	save_colors_3		"save #3"
+bind custom	tcol	s4	save_colors_4		"save #4"
+bind custom	tcol	r1	restore_colors_1	"restore #1"
+bind custom	tcol	r2	restore_colors_2	"restore #2"
+bind custom	tcol	r3	restore_colors_3	"restore #3"
+bind custom	tcol	r4	restore_colors_4	"restore #4"
+
+bind custom	tcol	n	normal_mode		"normal mode"
+bind custom	tcol	p	pick_mode		"pick mode"
+bind custom	tcol	mm	change_mode		"interactive change mode"
+bind custom	tcol	m1	change_color1		"interactive change color1"
+bind custom	tcol	m2	change_color2		"interactive change color2"
+bind custom	tcol	m3	change_color3		"interactive change color3"
+bind custom	tcol	m4	change_color4		"interactive change color4"
+bind custom	tcol	mc	change_color_fzf	"change color via fzf"
+bind custom	tcol	cf	color_fzf		"select color via fzf"
+bind custom	tcol	cb	color_black		"use black color"
+bind custom	tcol	cu	color_user		"chose from user colors"
+bind custom	tcol	cw	color_white		"use white color"
+
+bind custom	tcol	yy	copy_to_clipboard	"copy to clipboard"
+
+bind custom	tcol	QUESTION_MARK	k_bindings		"show command bindings"
+bind custom	tcol	h		display_help		"display help"
+
+current_swash=1            # background color / foreground color
+swash_x=0       swash_y=0  # position in color swash
+pane_0_x=1      pane_0_y=1 # position in preview pane 
+
+color_fg=15     color_bg=0
+color_fg1=0     color_bg1=0
+color_fg2=0     color_bg2=0
+color_fg3=0     color_bg3=0
+color_change=1
+
+mode=normal
+
+pick_mode()   { mode=pick   ; list ; }
+normal_mode() { mode=normal ; list ; }
+change_mode() { mode=change ; list ; }
+
+pick_background()
+{
+current_swash=0
+color_pos=$(get_color_pos $color_bg)
+
+swash_y=${color_pos%:*}
+swash_x=${color_pos#*:}
+list
+}
+
+pick_foreground()
+{
+current_swash=1
+color_pos=$(get_color_pos $color_fg)
+
+swash_y=${color_pos%:*}
+swash_x=${color_pos#*:}
+list
+}
+
+move_left()         { move_left_$mode ; }
+move_right()        { move_right_$mode ; }
+move_up()           { move_up_$mode ; }
+move_down()         { move_down_$mode ; }
+
+move_left_pick()    { ((pane_0_x > 1 && pane_0_x--))                     ; pick_pane_0_color ; list ; }
+move_right_pick()   { ((pane_0_x < (pane_columns[0] - 1) && pane_0_x++)) ; pick_pane_0_color ; list ; }
+move_up_pick()      { ((pane_0_y > 1 && pane_0_y--))                     ; pick_pane_0_color ; list ; }
+move_down_pick()    { ((pane_0_y < bottom_line && pane_0_y++))           ; pick_pane_0_color ; list ; }
+
+move_left_change()  { move_left_normal ; }
+move_right_change() { move_right_normal ; }
+move_up_change()    { move_up_normal ; }
+move_down_change()  { move_down_normal ; }
+
+move_left_normal()  { ((swash_x > 0 && swash_x--))  ; set_color ; list ; }
+move_right_normal() { ((swash_x < 17 && swash_x++)) ; set_color ; list ; }
+move_up_normal()    { ((swash_y > 0 && swash_y--))  ; set_color ; list ; }
+move_down_normal()  { ((swash_y < 14 && swash_y++)) ; set_color ; list ; }
+
+color_fzf()
+{
+exec 2>&9
+
+declare -n array_ref="source0"
+readarray -t fzf_color < <(printf "%s\n" "${array_ref[@]}" | ansi_extract_colors | awk '!seen[$1]++' | fzf --ansi -m)
+
+exec 2>"$fs/log"
+
+[[ "${fzf_color[0]}" ]] && color1=${fzf_color[0]} color1_c=$color1
+[[ "${fzf_color[1]}" ]] && color2=${fzf_color[1]} color2_c=$color2
+[[ "${fzf_color[2]}" ]] && color3=${fzf_color[2]} color3_c=$color3
+[[ "${fzf_color[3]}" ]] && color4=${fzf_color[3]} color4_c=$color4
+
+echo -en '\e[?1049h' ; stty -echo ; tput civis ; list
+}
+
+color_user()
+{
+exec 2>&9 ; readarray -t fzf_color < <(ansi_user_colors) ; exec 2>"$fs/log"
+
+[[ "${fzf_color[0]}" ]] && color1=${fzf_color[0]} color1_c=$color1
+[[ "${fzf_color[1]}" ]] && color2=${fzf_color[1]} color2_c=$color2
+[[ "${fzf_color[2]}" ]] && color3=${fzf_color[2]} color3_c=$color3
+[[ "${fzf_color[3]}" ]] && color4=${fzf_color[3]} color4_c=$color4
+
+echo -en '\e[?1049h' ; stty -echo ; tput civis ; list
+}
+
+color_black ()     { swash_y=0 ; swash_x=0 ; set_color ; list ; }
+color_white ()     { swash_y=0 ; swash_x=17 ; set_color ; list ; }
+reverse_colors()   { t_color=$color_fg ; color_fg=$color_bg ; color_bg=$t_color ; ((current_swash)) && pick_foreground || pick_background ; }
+
+save_colors_1()    { color_bg1=$color_bg ; color_fg1=$color_fg ; color1=$color ; color1_c=$color ; color_change=1 ; list ; }
+save_colors_2()    { color_bg2=$color_bg ; color_fg2=$color_fg ; color2=$color ; color2_c=$color ; color_change=2 ; list ; }
+save_colors_3()    { color_bg3=$color_bg ; color_fg3=$color_fg ; color3=$color ; color3_c=$color ; color_change=3 ; list ; }
+save_colors_4()    { color_bg4=$color_bg ; color_fg4=$color_fg ; color4=$color ; color4_c=$color ; color_change=4 ; list ; }
+                                           
+restore_colors_1() { color_bg=$color_bg1 ; color_fg=$color_fg1 ; list ; }
+restore_colors_2() { color_bg=$color_bg2 ; color_fg=$color_fg2 ; list ; }
+restore_colors_3() { color_bg=$color_bg3 ; color_fg=$color_fg3 ; list ; }
+restore_colors_4() { color_bg=$color_bg4 ; color_fg=$color_fg4 ; list ; }
+
+set_color()
+{
+(( t_color = color_swash[18 * swash_y + swash_x] ))
+((current_swash)) && color_fg=$t_color || color_bg=$t_color
+[[ $mode == change ]] && 
+	{
+	(( color_change == 1 )) && color1_c="48;5;$color_bg;38;5;$color_fg"
+	(( color_change == 2 )) && color2_c="48;5;$color_bg;38;5;$color_fg"
+	(( color_change == 3 )) && color3_c="48;5;$color_bg;38;5;$color_fg"
+	(( color_change == 4 )) && color4_c="48;5;$color_bg;38;5;$color_fg"
+	}
+}
+
+read -r -d '' ansi_extract_perl <<'EOC'
+use strict ; use warnings ;
+
+my ($color, $text_length) = (0, 0) ;
+
+for my $chunk ( split /(\e(?:\[(?:[0-9;]*)m))/, $ARGV[0])
+	{
+	if($chunk =~ /\e(\[([0-9;]*)m)/)
+		{
+		$color = $2 ;
+		}
+	else
+		{
+		$text_length += length($chunk) ;
+		if($text_length > ($ARGV[1] // 0))
+			{
+			print "$color\n" ;
+			exit
+			}
+		}
+	}
+
+print "$color\n"
+EOC
+
+pick_pane_0_color()
+{
+array_name=${line_blocks[0]} ; declare -n array_ref="$array_name"
+
+color_pick="$(perl -e "$ansi_extract_perl" "${array_ref[$(( pane_0_y - 1 ))]}" $((pane_0_x - 1)))"
+}
+
+change_color1() { color_change=1 ; }
+change_color2() { color_change=2 ; }
+change_color3() { color_change=3 ; }
+change_color4() { color_change=4 ; }
+
+change_color_fzf()
+{
+exec 2>&9 ; readarray -t fzf_color < <(ansi_user_colors) ; exec 2>"$fs/log"
+
+[[ $color_change -eq 1 ]] && color1_c=${fzf_color[0]}
+[[ $color_change -eq 2 ]] && color2_c=${fzf_color[0]}
+[[ $color_change -eq 3 ]] && color3_c=${fzf_color[0]}
+[[ $color_change -eq 4 ]] && color4_c=${fzf_color[0]}
+
+echo -en '\e[?1049h' ; stty -echo ; tput civis
+list
+}
+
+
+overlay_text()
+{
+((swash_pane_x = pane_columns[0] + 1))
+
+[[ $mode == normal || $mode == change ]] && 
+	{ color="48;5;$color_bg;38;5;$color_fg" ; rcolor="48;5;$color_fg;38;5;$color_bg" ; }
+
+[[ $mode == pick ]] && color=$color_pick
+
+echo -en "\e[1;${swash_pane_x}H\e[${color}m                  "
+echo -en "\e[2;${swash_pane_x}H\e[${color}m   Lorem  Ipsum   "
+echo -en "\e[3;${swash_pane_x}H\e[${color}m                  "
+
+# echo -en "\e[5;${swash_pane_x}H\e[${rcolor}m   Lorem  Ipsum   "
+
+echo -en "\e[5;${swash_pane_x}H\e[${color1}m   Lorem \e[${color1_c}m Ipsum   $RESET"
+echo -en "\e[6;${swash_pane_x}H\e[${color2}m   Lorem \e[${color2_c}m Ipsum   $RESET"
+echo -en "\e[7;${swash_pane_x}H\e[${color3}m   Lorem \e[${color3_c}m Ipsum   $RESET"
+echo -en "\e[8;${swash_pane_x}H\e[${color4}m   Lorem \e[${color4_c}m Ipsum   $RESET"
+
+[[ $mode == normal || $mode == change ]] &&
+	{
+	((color_swash_y = 10 + swash_y , color_swash_x = swash_pane_x + swash_x))
+	echo -en "\e[$color_swash_y;${color_swash_x}H${RESET}X"
+	}
+
+[[ $mode == pick ]] && echo -en "\e[$pane_0_y;${pane_0_x}H${RESET}X" 
+
+echo -en "\e[25;${swash_pane_x}H\e[38;5;240m[${color}$RESET"
+}
+
+get_pane_text()
+{
+local text_ref=$1 top_line="$2" line="$3" pline="$4" source_index="$5" array_name="$6"
+
+declare -n text="$text_ref"
+declare -n array_ref="$array_name"
+
+((line--)) # display line indexed from 1
+((line < ${#array_ref[@]})) && text="${array_ref[line]}" || text="${padding[source_index]}"
+
+[[ $mode == change ]] &&
+	{
+	[[ "$color1_c" ]] && text=${text//$color1/$color1_c}
+	[[ "$color2_c" ]] && text=${text//$color2/$color2_c}
+	[[ "$color3_c" ]] && text=${text//$color3/$color3_c}
+	[[ "$color4_c" ]] && text=${text//$color4/$color4_c}
+	text="$text"
+	}
+}
+
+quit_no_output() { restore_screen ; exit ; }
+quit()           { restore_screen ; display_colors ; exit ;}
+
+display_colors()
+{
+echo -e "\e[${color}m${color}$RESET"
+
+[[ "$color1" ]] && 
+	{
+	echo -en "1: \e[${color1}m${color1}$RESET"
+	[[ "$color1" != "$color1_c" ]] && echo -en " -> \e[${color1_c}m${color1_c}$RESET"
+	echo
+	}
+
+[[ "$color2" ]] && 
+	{
+	echo -en "2: \e[${color2}m${color2}$RESET"
+	[[ "$color2" != "$color2_c" ]] && echo -en " -> \e[${color2_c}m${color2_c}$RESET"
+	echo
+	}
+
+[[ "$color3" ]] && 
+	{
+	echo -en "3: \e[${color3}m${color3}$RESET"
+	[[ "$color3" != "$color3_c" ]] && echo -en " -> \e[${color3_c}m${color3_c}$RESET"
+	echo
+	}
+
+[[ "$color4" ]] && 
+	{
+	echo -en "4: \e[${color4}m${color4}$RESET"
+	[[ "$color4" != "$color4_c" ]] && echo -en " -> \e[${color4_c}m${color4_c}$RESET"
+	echo
+	}
+}
+
+copy_to_clipboard() { echo -n "${color}" | xclip -selection c ; }
+
+get_color_pos()
+{
+cell=0
+for (( l = 0 ; l < 15 ; l++))
+	do
+
+	for (( c = 0 ; c < 18 ; c++))
+		do
+			(( $1 == color_swash[$cell] )) && { echo $l:$c ; break 2 ; }
+			(( cell++ ))
+		done
+	
+	done
+}
+
+color_swash=(
+0   0   0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
+232 233 234 235 236 237 238 239 240 241 242 243 235 241 243 230 136 130
+244 245 246 247 248 249 250 251 252 253 254 255 160 168 98  32  36  100 
+16  17  18  52  53  54  88  89  90  124 125 126 160 161 162 196 197 198
+22  23  24  58  59  60  94  95  96  130 131 132 166 167 168 202 203 204
+28  29  30  64  65  66  100 101 102 136 137 138 172 173 174 208 209 210
+34  35  36  70  71  72  106 107 108 142 143 144 178 179 180 214 215 216
+40  41  42  76  77  78  112 113 114 148 149 150 184 185 186 220 221 222
+46  47  48  82  83  84  118 119 120 154 155 156 190 191 192 226 227 228
+19  20  21  55  56  57  91  92  93  127 128 129 163 164 165 199 200 201
+25  26  27  61  62  63  97  98  99  133 134 135 169 170 171 205 206 207
+31  32  33  67  68  69  103 104 105 139 140 141 175 176 177 211 212 213
+37  38  39  73  74  75  109 110 111 145 146 147 181 182 183 217 218 219
+43  44  45  79  80  81  115 116 117 151 152 153 187 188 189 223 224 225
+49  50  51  85  86  87  121 122 123 157 158 159 193 194 195 229 230 231
+)
+
+display_help() { clear ; tcol -h | $PAGER ; echo -en '\e[?1049h' ; stty -echo ; tput civis ; list ; }
+
+# vim: set ft=bash:
+
