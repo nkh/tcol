@@ -1,45 +1,47 @@
 
-bind custom	tcol	j	move_down		"scroll down"
-bind custom	tcol	DOWN	move_down		"scroll down"
-bind custom	tcol	UP	move_up 		"scroll up"
-bind custom	tcol	k	move_up 		"scroll up"
-bind custom	tcol	RIGHT	move_right		"move right"
-bind custom	tcol	l	move_right		"move right"
-bind custom	tcol	LEFT	move_left		"move left"
-bind custom	tcol	h	move_left		"move left"
+bind custom	tcol	j		move_down		"scroll down"
+bind custom	tcol	DOWN		move_down		"scroll down"
+bind custom	tcol	UP		move_up 		"scroll up"
+bind custom	tcol	k		move_up 		"scroll up"
+bind custom	tcol	RIGHT		move_right		"move right"
+bind custom	tcol	l		move_right		"move right"
+bind custom	tcol	LEFT		move_left		"move left"
+bind custom	tcol	h		move_left		"move left"
 
-bind custom	tcol	Q	quit_no_output		"quit without displaying color data"
-bind custom	tcol	q	quit			"quit"
-
-bind custom	tcol	b	pick_background		"pick background"
-bind custom	tcol	f	pick_foreground		"pick foreground"
-bind custom	tcol	R	reverse_colors		"reverse"
-bind custom	tcol	s1	save_colors_1		"save #1"
-bind custom	tcol	s2	save_colors_2		"save #2"
-bind custom	tcol	s3	save_colors_3		"save #3"
-bind custom	tcol	s4	save_colors_4		"save #4"
-bind custom	tcol	r1	restore_colors_1	"restore #1"
-bind custom	tcol	r2	restore_colors_2	"restore #2"
-bind custom	tcol	r3	restore_colors_3	"restore #3"
-bind custom	tcol	r4	restore_colors_4	"restore #4"
-
-bind custom	tcol	n	normal_mode		"normal mode"
-bind custom	tcol	p	pick_mode		"pick mode"
-bind custom	tcol	mm	change_mode		"interactive change mode"
-bind custom	tcol	m1	change_color1		"interactive change color1"
-bind custom	tcol	m2	change_color2		"interactive change color2"
-bind custom	tcol	m3	change_color3		"interactive change color3"
-bind custom	tcol	m4	change_color4		"interactive change color4"
-bind custom	tcol	mc	change_color_fzf	"change color via fzf"
-bind custom	tcol	cf	color_fzf		"select color via fzf"
-bind custom	tcol	cb	color_black		"use black color"
-bind custom	tcol	cu	color_user		"chose from user colors"
-bind custom	tcol	cw	color_white		"use white color"
-
-bind custom	tcol	yy	copy_to_clipboard	"copy to clipboard"
-
-bind custom	tcol	QUESTION_MARK	k_bindings		"show command bindings"
+bind custom	tcol	yy		copy_to_clipboard	"copy to clipboard"
+bind custom	tcol	yq		copy_and_quit		"copy to clipboard and quit"
+bind custom	tcol	Q		quit_no_output		"quit without displaying color data"
+bind custom	tcol	q		quit			"quit"
+bind custom	tcol	QUESTION_MARK	k_bindings		"show bindings"
 bind custom	tcol	h		display_help		"display help"
+
+bind custom	tcol	b		pick_background		"pick background"
+bind custom	tcol	f		pick_foreground		"pick foreground"
+bind custom	tcol	cb		color_black		"use black color"
+bind custom	tcol	cw		color_white		"use white color"
+bind custom	tcol	cr		reverse_colors		"reverse"
+bind custom	tcol	r1		restore_colors_1	"restore #1"
+bind custom	tcol	r2		restore_colors_2	"restore #2"
+bind custom	tcol	r3		restore_colors_3	"restore #3"
+bind custom	tcol	r4		restore_colors_4	"restore #4"
+
+bind custom	tcol	n		normal_mode		"normal mode"
+bind custom	tcol	p		pick_mode		"pick mode"
+bind custom	tcol	mm		change_mode		"modification mode"
+
+bind custom	tcol	m1		save_colors_1		"save #1"
+bind custom	tcol	m2		save_colors_2		"save #2"
+bind custom	tcol	m3		save_colors_3		"save #3"
+bind custom	tcol	m4		save_colors_4		"save #4"
+bind custom	tcol	mc		change_color_fzf	"set change color"
+bind custom	tcol	mf		color_fzf		"set modification color"
+bind custom	tcol	mF		color_fzf_all		"set all modification colors"
+bind custom	tcol	mu		color_user		"chose from user colors"
+bind custom	tcol	mU		color_user_all		"chose all from user colors"
+bind custom	tcol	s1		select_color1		"select color 1"
+bind custom	tcol	s2		select_color2		"select color 2"
+bind custom	tcol	s3		select_color3		"select color 3"
+bind custom	tcol	s4		select_color4		"select color 4"
 
 current_swash=1            # background color / foreground color
 swash_x=0       swash_y=0  # position in color swash
@@ -106,10 +108,27 @@ readarray -t fzf_color < <(printf "%s\n" "${array_ref[@]}" | ansi_extract_colors
 
 exec 2>"$fs/log"
 
-[[ "${fzf_color[0]}" ]] && color1=${fzf_color[0]} color1_c=$color1
-[[ "${fzf_color[1]}" ]] && color2=${fzf_color[1]} color2_c=$color2
-[[ "${fzf_color[2]}" ]] && color3=${fzf_color[2]} color3_c=$color3
-[[ "${fzf_color[3]}" ]] && color4=${fzf_color[3]} color4_c=$color4
+(( color_change == 1 )) && color1=${fzf_color[0]}
+(( color_change == 2 )) && color2=${fzf_color[0]}
+(( color_change == 3 )) && color3=${fzf_color[0]}
+(( color_change == 4 )) && color4=${fzf_color[0]}
+
+echo -en '\e[?1049h' ; stty -echo ; tput civis ; list
+}
+
+color_fzf_all()
+{
+exec 2>&9
+
+declare -n array_ref="source0"
+readarray -t fzf_color < <(printf "%s\n" "${array_ref[@]}" | ansi_extract_colors | awk '!seen[$1]++' | fzf --ansi -m)
+
+exec 2>"$fs/log"
+
+[[ "${fzf_color[0]}" ]] && color1=${fzf_color[0]}
+[[ "${fzf_color[1]}" ]] && color2=${fzf_color[1]}
+[[ "${fzf_color[2]}" ]] && color3=${fzf_color[2]}
+[[ "${fzf_color[3]}" ]] && color4=${fzf_color[3]}
 
 echo -en '\e[?1049h' ; stty -echo ; tput civis ; list
 }
@@ -118,10 +137,22 @@ color_user()
 {
 exec 2>&9 ; readarray -t fzf_color < <(ansi_user_colors) ; exec 2>"$fs/log"
 
-[[ "${fzf_color[0]}" ]] && color1=${fzf_color[0]} color1_c=$color1
-[[ "${fzf_color[1]}" ]] && color2=${fzf_color[1]} color2_c=$color2
-[[ "${fzf_color[2]}" ]] && color3=${fzf_color[2]} color3_c=$color3
-[[ "${fzf_color[3]}" ]] && color4=${fzf_color[3]} color4_c=$color4
+(( color_change == 1 )) && color1=${fzf_color[0]}
+(( color_change == 2 )) && color2=${fzf_color[0]}
+(( color_change == 3 )) && color3=${fzf_color[0]}
+(( color_change == 4 )) && color4=${fzf_color[0]}
+
+echo -en '\e[?1049h' ; stty -echo ; tput civis ; list
+}
+
+color_user_all()
+{
+exec 2>&9 ; readarray -t fzf_color < <(ansi_user_colors) ; exec 2>"$fs/log"
+
+[[ "${fzf_color[0]}" ]] && color1=${fzf_color[0]}
+[[ "${fzf_color[1]}" ]] && color2=${fzf_color[1]}
+[[ "${fzf_color[2]}" ]] && color3=${fzf_color[2]}
+[[ "${fzf_color[3]}" ]] && color4=${fzf_color[3]}
 
 echo -en '\e[?1049h' ; stty -echo ; tput civis ; list
 }
@@ -130,10 +161,10 @@ color_black ()     { swash_y=0 ; swash_x=0 ; set_color ; list ; }
 color_white ()     { swash_y=0 ; swash_x=17 ; set_color ; list ; }
 reverse_colors()   { t_color=$color_fg ; color_fg=$color_bg ; color_bg=$t_color ; ((current_swash)) && pick_foreground || pick_background ; }
 
-save_colors_1()    { color_bg1=$color_bg ; color_fg1=$color_fg ; color1=$color ; color1_c=$color ; color_change=1 ; list ; }
-save_colors_2()    { color_bg2=$color_bg ; color_fg2=$color_fg ; color2=$color ; color2_c=$color ; color_change=2 ; list ; }
-save_colors_3()    { color_bg3=$color_bg ; color_fg3=$color_fg ; color3=$color ; color3_c=$color ; color_change=3 ; list ; }
-save_colors_4()    { color_bg4=$color_bg ; color_fg4=$color_fg ; color4=$color ; color4_c=$color ; color_change=4 ; list ; }
+save_colors_1()    { color_bg1=$color_bg ; color_fg1=$color_fg ; color1=$color ; color_change=1 ; list ; }
+save_colors_2()    { color_bg2=$color_bg ; color_fg2=$color_fg ; color2=$color ; color_change=2 ; list ; }
+save_colors_3()    { color_bg3=$color_bg ; color_fg3=$color_fg ; color3=$color ; color_change=3 ; list ; }
+save_colors_4()    { color_bg4=$color_bg ; color_fg4=$color_fg ; color4=$color ; color_change=4 ; list ; }
                                            
 restore_colors_1() { color_bg=$color_bg1 ; color_fg=$color_fg1 ; list ; }
 restore_colors_2() { color_bg=$color_bg2 ; color_fg=$color_fg2 ; list ; }
@@ -152,6 +183,10 @@ set_color()
 	(( color_change == 4 )) && color4_c="48;5;$color_bg;38;5;$color_fg"
 	}
 }
+
+pick_pane_0_color()
+{
+array_name=${line_blocks[0]} ; declare -n array_ref="$array_name"
 
 read -r -d '' ansi_extract_perl <<'EOC'
 use strict ; use warnings ;
@@ -178,17 +213,13 @@ for my $chunk ( split /(\e(?:\[(?:[0-9;]*)m))/, $ARGV[0])
 print "$color\n"
 EOC
 
-pick_pane_0_color()
-{
-array_name=${line_blocks[0]} ; declare -n array_ref="$array_name"
-
 color_pick="$(perl -e "$ansi_extract_perl" "${array_ref[$(( pane_0_y - 1 ))]}" $((pane_0_x - 1)))"
 }
 
-change_color1() { color_change=1 ; }
-change_color2() { color_change=2 ; }
-change_color3() { color_change=3 ; }
-change_color4() { color_change=4 ; }
+select_color1() { color_change=1 ; }
+select_color2() { color_change=2 ; }
+select_color3() { color_change=3 ; }
+select_color4() { color_change=4 ; }
 
 change_color_fzf()
 {
@@ -202,7 +233,6 @@ exec 2>&9 ; readarray -t fzf_color < <(ansi_user_colors) ; exec 2>"$fs/log"
 echo -en '\e[?1049h' ; stty -echo ; tput civis
 list
 }
-
 
 overlay_text()
 {
@@ -292,6 +322,7 @@ echo -e "\e[${color}m${color}$RESET"
 }
 
 copy_to_clipboard() { echo -n "${color}" | xclip -selection c ; }
+copy_and_quit()     { copy_to_clipboard ; quit_no_output ; }
 
 get_color_pos()
 {

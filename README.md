@@ -35,16 +35,15 @@ The picker consists of:
 
 *tcol* had three modes of operation:
 
-| mode   | operation                       |
-| ------ | ------------------------------- |
-| normal | chose a color                   |
-| pick   | get a color from a colored text |
-| change | modify a color                  |
-
+| binding       | modes                              |
+| -------       | ---------------------------------- |
+| n             | normal mode                        |
+| p             | pick mode                          |
+| mm            | modification mode                  |
 
 ## Normal mode
 
-Move the cursor in the color swash, the color code is updated.
+Move the cursor in the color swash, the current color and color code are updated.
 
 When you quite *tcol* the selected color code is displayed, you can also copy the code to the clipboard.
 
@@ -55,7 +54,7 @@ When you quite *tcol* the selected color code is displayed, you can also copy th
 
 ## Pick mode
 
-If you passa file to *tcol*, the file will be displayed in the left pane.
+If you pass a file to *tcol*, the file will be displayed in the left pane.
 
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_0.png)
 
@@ -66,45 +65,41 @@ You can select a color from the left pane and put in one of the color registries
 - pre 'p' to get in the pick mode
 - use the movement keys to place the cursor on the color you want to change
 	- the current color swash will reflect the color you're on
-- put the color in one of the registries with 's[1-4]
+- put the color in one of the modification registries with 'm[1-4]
 
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_1.png)
 
 ### fzf
 
 You can also chose the color to put in the color registries with the help of fzf
-- press 'cf'
+- press 'mf' to set current registry, 'mF' to set all registries
 - select colors with 'tab'
 - press 'enter'
 
-Up to four colors can be chosen
+You can also batch load user defined modification colors. *tcol* runs command **ansi_user_colors** which should return predefine colors.
 
-You can also batch load modification colors. *tcol* runs command **ansi_user_colors** which should return predefine colors.
+- press 'mu' to load a color in the current registry
+- press 'mU' to load a color in all the registries
 
-- press 'mc' to load the modification colors
-
-Note that **ansi_user_colors** is a command so you chose a color to return in an interactive picker like FZF.
+Note that **ansi_user_colors** is a command so you can chose a color to return in an interactive picker like FZF.
 
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_fzf.png)
 
-## Change mode
+## Modification mode
 
 You can change the colors in the color registry, the left pane will reflect the changes. Note that your text is not changed only the preview.
 
-- press 'mm' to start change mode
-- select a registry with 'm[1-4]
+- press 'mm'
 - use the movement keys to select a new color
     - the color registry displays the original color and the new color
 
+Use 's[1-4]' to select a different registry to modify
+
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_2.png)
 
-### Using predefined colors
+## Flip preview between modified and unmodified colors
 
-ansi_user-colors
-
-## Preview
-
-You can go back to normal mode, that will show the unmodified colors, and back to modify mode.
+You can go back to normal mode with 'n' and back to modify mode with 'mm'.
 
 # OUTPUT
 
@@ -112,7 +107,7 @@ You can go back to normal mode, that will show the unmodified colors, and back t
 
 ## Bindings
 
-| binding       | function                           |
+| binding       | movements                          |
 | -------       | ---------------------------------- |
 | j             | scroll down                        |
 | DOWN          | scroll down                        |
@@ -122,34 +117,49 @@ You can go back to normal mode, that will show the unmodified colors, and back t
 | l             | move right                         |
 | LEFT          | move left                          |
 | h             | move left                          |
+
+| binding       | tcol                               |
+| -------       | ---------------------------------- |
+| yy            | copy to clipboard                  |
+| yq            | copy to clipboard  and quit        |
 | Q             | quit without displaying color data |
 | q             | quit                               |
+| QUESTION_MARK | show bindings                      |
+| h             | display help                       |
+
+| binding       | colors                             |
+| -------       | ---------------------------------- |
 | b             | pick background                    |
 | f             | pick foreground                    |
-| R             | reverse                            |
-| s1            | save #1                            |
-| s2            | save #2                            |
-| s3            | save #3                            |
-| s4            | save #4                            |
+| cb            | use black color                    |
+| cw            | use white color                    |
+| cr            | reverse                            |
 | r1            | restore #1                         |
 | r2            | restore #2                         |
 | r3            | restore #3                         |
 | r4            | restore #4                         |
+
+| binding       | modes                              |
+| -------       | ---------------------------------- |
 | n             | normal mode                        |
 | p             | pick mode                          |
-| mm            | interactive change mode            |
-| m1            | interactive change color1          |
-| m2            | interactive change color2          |
-| m3            | interactive change color3          |
-| m4            | interactive change color4          |
-| mc            | change color via fzf               |
-| cf            | select color via fzf               |
-| cb            | use black color                    |
-| cu            | chose from user colors             |
-| cw            | use white color                    |
-| yy            | copy to clipboard                  |
-| QUESTION_MARK | show command bindings              |
-| h             | display help                       |
+| mm            | modification mode                  |
+
+| binding       | modification mode                  |
+| -------       | ---------------------------------- |
+| m1            | save #1                            |
+| m2            | save #2                            |
+| m3            | save #3                            |
+| m4            | save #4                            |
+| mc            | set change color                   |
+| mf            | set modification color             |
+| mF            | set all modification colors        |
+| mu            | chose from user colors             |
+| mU            | chose all from user colors         |
+| s1            | select #1                          |
+| s2            | select #2                          |
+| s3            | select #3                          |
+| s4            | select #4                          |
 
 # DEPENDENCIES
 

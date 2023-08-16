@@ -1,6 +1,4 @@
 
-write README.md and online help
-
 document -e user_colors=file usage
 
 extract color when ansi other than colors is in the lines
