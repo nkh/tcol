@@ -339,6 +339,21 @@ for (( l = 0 ; l < 15 ; l++))
 	done
 }
 
+display_help() { clear ; tcol -h | $PAGER ; echo -en '\e[?1049h' ; stty -echo ; tput civis ; list ; }
+
+color_swash()
+{
+for i in {1..9} ; do echo ; done
+
+color_index=0
+
+for l in {0..14} ; do
+	for c in {0..17} ; do echo -en "\e[48;5;${color_swash[color_index]}m " ;  ((color_index++)) ; done
+	echo -e "\e[0m";
+done
+
+}
+
 color_swash=(
 0   0   0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
 232 233 234 235 236 237 238 239 240 241 242 243 235 241 243 230 136 130
@@ -356,8 +371,6 @@ color_swash=(
 43  44  45  79  80  81  115 116 117 151 152 153 187 188 189 223 224 225
 49  50  51  85  86  87  121 122 123 157 158 159 193 194 195 229 230 231
 )
-
-display_help() { clear ; tcol -h | $PAGER ; echo -en '\e[?1049h' ; stty -echo ; tput civis ; list ; }
 
 # vim: set ft=bash:
 

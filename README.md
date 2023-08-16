@@ -172,7 +172,16 @@ You can go back to normal mode with 'n' and back to modify mode with 'mm'.
 
 Clone the repository and add it to your PATH; or link/copy the files to somewhere in your PATH.
 
-# AUTHORS
+## Generate Documentation
+
+***utils/gen_man_page*** can be used to generate a man page, it needs pandoc.
+
+The documentation is this README, you will get:
+- a man page
+- *tcol -h* will display the man page
+- command 'h' will display the man page
+
+# AUTHOR
 
 	Khemir Nadim ibn Hamouda
 	https://github.com/nkh

@@ -1,0 +1,4 @@
+#!/bin/bash
+pandoc --standalone -p --tab-stop=8 --to man README.md -o tcol.1
+gzip < tcol.1 > tcol.1.gz
+sudo cp tcol.1.gz /usr/share/man/man1

@@ -1,59 +1,9 @@
 #!/bin/bash
 
-ansi_swash()
-{
-for i in {1..9} ; do echo ; done
-
-# system colors 
-echo -n '  '
-for i in {0..15} ; do echo -en "\e[48;5;${i}m " ;  done
-echo -e "\e[0m";
-
-# grey shades
-for i in {232..243} ; do echo -en "\e[48;5;${i}m " ;  done 
-
-# solarized
-for i in 235 241 243 230 136 130 ; do echo -en "\e[48;5;${i}m " ;  done 
-echo -e "\e[0m"
-
-# grey shades
-for i in {244..255} ; do echo -en "\e[48;5;${i}m " ;  done
-
-# solarized
-for i in 160 168 98 32  36 100 ; do echo -en "\e[48;5;${i}m " ;  done 
-echo -e "\e[0m"
-
-for b in {0,3} ; do
-	for g in {0..5} ; do
-		for r in {0..5} ; do
-			((color = 16 + (r * 36) + (g * 6) + b))
-
-			echo -en "\e[38;5;255;48;5;${color}m "
-
-			((color++))
-			echo -en "\e[38;5;255;48;5;${color}m "
-
-			((color++))
-			echo -en "\e[38;5;255;48;5;${color}m \e[0m"
-		done
-
-		echo
-
-	done
-done
-
-# echo -en "\e[0m";
-}
-
 help()
 {
-echo "NAME
-    tcol - interactive color picker for the terminal
-
-SYNOPSIS
-    tcol
-    tdiff file
-"
+man "$1" > /dev/null 2>&1 && man tcol || echo tcol: please generate man page
+exit
 }
 
 # Parse options
@@ -62,7 +12,7 @@ eval set -- "$options"
 
 while [[ $1 != -- ]]; do
 	case $1 in
-		-h|--help ) help ;  exit ;;
+		-h|--help ) help ;;
 		*         ) echo "tdiff: bad option: $1" >&2; exit 1;;
 	esac
 done
@@ -71,11 +21,11 @@ shift # --
 options="-a --no-color --no-bindings"
 
 if [[ -z "$1" ]] ; then
-	paneless $options -c $(dirname $0)/tcol.pless -C 0 -w 100% <(:) -w 18 <(ansi_swash) "${@:2}"
+	paneless $options -c $(dirname $0)/tcol.pless -C 0 -w 100% <(:) -w 18 <(:) "${@:2}"
 elif [[ -f "$1" || -p "$1" ]] ; then
-	paneless $options -c $(dirname $0)/tcol.pless -C 0 -w 100% "$1" -w 18 <(ansi_swash) "${@:2}"
+	paneless $options -c $(dirname $0)/tcol.pless -C 0 -w 100% "$1" -I "1=color_swash" -w 18 <(:) "${@:2}"
 else
-	help ; exit 1
+	echo "tcol: input must be a file, try tcol --help" ; exit 1
 fi
 
 
