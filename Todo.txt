@@ -1,15 +1,8 @@
 
-document -e user_colors=file usage
-
-extract color wrong
-	when ansi other than colors is in the lines
-		example: tree glyphs 
-
 bg/fg colors parsed
 	from input on the left side
 	and fzf input
 
 	from clipboard
 
-put modification colors in array
-
+	allows us to set fg and bg so the chosing starts at the color no (0, 0)

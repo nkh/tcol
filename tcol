@@ -13,7 +13,7 @@ eval set -- "$options"
 while [[ $1 != -- ]]; do
 	case $1 in
 		-h|--help ) help ;;
-		*         ) echo "tdiff: bad option: $1" >&2; exit 1;;
+		*         ) echo "tdiff: bad option: $1" >&2 ; exit 1;;
 	esac
 done
 shift # --
@@ -21,7 +21,7 @@ shift # --
 options="-a --no-color --no-bindings"
 
 if [[ -z "$1" ]] ; then
-	paneless $options -c $(dirname $0)/tcol.pless -C 0 -w 100% <(:) -w 18 <(:) "${@:2}"
+	paneless $options -c $(dirname $0)/tcol.pless -C 0 -w 100% <(:) -I "1=color_swash" -w 18 <(:) "${@:2}"
 elif [[ -f "$1" || -p "$1" ]] ; then
 	paneless $options -c $(dirname $0)/tcol.pless -C 0 -w 100% "$1" -I "1=color_swash" -w 18 <(:) "${@:2}"
 else
