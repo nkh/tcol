@@ -1,8 +1,16 @@
+bug
+	tcol <(git grep --color --line-number -P 'pane' $(git rev-list HEAD) | git_grep_reformat)
+	mF + select 4 colors
+	mm
+	s2 <-
+	s3 <-
 
 bg/fg colors parsed
 	from input on the left side
-	and fzf input
+	fzf input
+		user_color go to change side not picked side
 
 	from clipboard
-
+		when stated via tmux shortcut
+		
 	allows us to set fg and bg so the chosing starts at the color no (0, 0)

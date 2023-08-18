@@ -6,24 +6,30 @@ man "$1" > /dev/null 2>&1 && man tcol || echo tcol: please generate man page
 exit
 }
 
+options_pass_through=()
+
 # Parse options
-options=$(getopt -o h -l help -n "$0" -- "$@") || exit
+options=$(getopt -o h -l help,oc,no-color-output -n "$0" -- "$@") || exit
 eval set -- "$options"
 
 while [[ $1 != -- ]]; do
 	case $1 in
-		-h|--help ) help ;;
-		*         ) echo "tdiff: bad option: $1" >&2 ; exit 1;;
+		-h|--help        ) help ;;
+		--oc             ) options_pass_through+=("$1=1") ; shift  ;;
+		--no-color-output) options_pass_through+=("$1=1") ; shift  ;;
+		*                ) echo "tdiff: bad option: $1" >&2  ; exit 1 ;;
 	esac
 done
 shift # --
 
+e_options="$(printf -- "-e %s " "${options_pass_through[@]}")"
+
 options="-a --no-color --no-bindings"
 
 if [[ -z "$1" ]] ; then
-	paneless $options -c $(dirname $0)/tcol.pless -C 0 -w 100% <(:) -I "1=color_swash" -w 18 <(:) "${@:2}"
+	paneless $e_options $options -c $(dirname $0)/tcol.pless -C 0 -w 100% <(:) -I "1=color_swash" -w 18 <(:) "${@:2}"
 elif [[ -f "$1" || -p "$1" ]] ; then
-	paneless $options -c $(dirname $0)/tcol.pless -C 0 -w 100% "$1" -I "1=color_swash" -w 18 <(:) "${@:2}"
+	paneless $e_options $options -c $(dirname $0)/tcol.pless -C 0 -w 100% "$1" -I "1=color_swash" -w 18 <(:) "${@:2}"
 else
 	echo "tcol: input must be a file, try tcol --help" ; exit 1
 fi

@@ -5,7 +5,7 @@
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_1.png)
 
 # SYNOPSIS
-    tcol
+    tcol [--oc --no-color-output]
     tcol file
 
 # DESCRIPTION
@@ -83,6 +83,10 @@ You can also batch load user defined modification colors. *tcol* runs command **
 
 Note that **ansi_user_colors** is a command so you can chose a color to return in an interactive picker like FZF.
 
+The same can be done with command **ansi_user_colors_by_name** with the following bindings
+- press 'mn' to load a color in the current registry
+- press 'mN' to load a color in all the registries
+
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_fzf.png)
 
 ## Modification mode
@@ -144,6 +148,7 @@ You can go back to normal mode with 'n' and back to modify mode with 'mm'.
 | n             | normal mode                        |
 | p             | pick mode                          |
 | mm            | modification mode                  |
+| a             | alternate normal/modification      |
 
 | binding       | modification mode                  |
 | -------       | ---------------------------------- |
@@ -156,6 +161,7 @@ You can go back to normal mode with 'n' and back to modify mode with 'mm'.
 | mF            | set all modification colors        |
 | mu            | chose from user colors             |
 | mU            | chose all from user colors         |
+| mn            | chose from named colors            |
 | s1            | select #1                          |
 | s2            | select #2                          |
 | s3            | select #3                          |
