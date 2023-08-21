@@ -43,8 +43,8 @@ bind tcol	color		mn		color_user_name		"chose from user colors by name"
 bind tcol	color		mN		color_user_name_all	"chose all from user colors by name"
 bind tcol	color		QUOTE		select_color		"select color registry"
 
-current_swash=1            # background color / foreground color
-swash_x=0       swash_y=0  # position in color swash
+current_swatch=1            # background color / foreground color
+swatch_x=0       swatch_y=0  # position in color swatch
 pane_0_x=1      pane_0_y=1 # position in preview pane 
 
 color_fg=15     color_bg=0
@@ -59,19 +59,19 @@ alternate_mode() { [[ $mode == pick ]] && return ; [[ $mode == normal ]] && mode
 
 pick_background()
 {
-current_swash=0
+current_swatch=0
 color_pos=$(get_color_pos $color_bg)
 
-swash_y=${color_pos%:*} swash_x=${color_pos#*:}
+swatch_y=${color_pos%:*} swatch_x=${color_pos#*:}
 list
 }
 
 pick_foreground()
 {
-current_swash=1
+current_swatch=1
 color_pos=$(get_color_pos $color_fg)
 
-swash_y=${color_pos%:*} swash_x=${color_pos#*:}
+swatch_y=${color_pos%:*} swatch_x=${color_pos#*:}
 list
 }
 
@@ -90,10 +90,10 @@ move_right_change() { move_right_normal ; }
 move_up_change()    { move_up_normal ; }
 move_down_change()  { move_down_normal ; }
 
-move_left_normal()  { ((swash_x > 0 && swash_x--))  ; set_color ; list ; }
-move_right_normal() { ((swash_x < 17 && swash_x++)) ; set_color ; list ; }
-move_up_normal()    { ((swash_y > 0 && swash_y--))  ; set_color ; list ; }
-move_down_normal()  { ((swash_y < 14 && swash_y++)) ; set_color ; list ; }
+move_left_normal()  { ((swatch_x > 0 && swatch_x--))  ; set_color ; list ; }
+move_right_normal() { ((swatch_x < 17 && swatch_x++)) ; set_color ; list ; }
+move_up_normal()    { ((swatch_y > 0 && swatch_y--))  ; set_color ; list ; }
+move_down_normal()  { ((swatch_y < 14 && swatch_y++)) ; set_color ; list ; }
 
 color_fzf()
 {
@@ -161,9 +161,9 @@ for c in {0..3} ; do [[ "${fzf_color[c]}" ]] && mcolors[c]=${fzf_color[c]} ; don
 echo -en '\e[?1049h' ; stty -echo ; tput civis ; list
 }
 
-color_black ()   { swash_y=0 ; swash_x=0  ; set_color ; list ; }
-color_white ()   { swash_y=0 ; swash_x=17 ; set_color ; list ; }
-reverse_colors() { t_color=$color_fg ; color_fg=$color_bg ; color_bg=$t_color ; ((current_swash)) && pick_foreground || pick_background ; }
+color_black ()   { swatch_y=0 ; swatch_x=0  ; set_color ; list ; }
+color_white ()   { swatch_y=0 ; swatch_x=17 ; set_color ; list ; }
+reverse_colors() { t_color=$color_fg ; color_fg=$color_bg ; color_bg=$t_color ; ((current_swatch)) && pick_foreground || pick_background ; }
 select_color()   { read -sn 1 ; [[ $REPLY && $REPLY =~ ^[0-9]$ ]] && (( mcolors_index = REPLY -1 )) ; }
 
 colors_1() { colors_reg_n 1 ; }
@@ -193,8 +193,8 @@ restore_colors_4() { color_bg=${mcolor_bg[3]} ; color_fg=${mcolor_fg[3]} ; list 
 
 set_color()
 {
-(( t_color = color_swash[18 * swash_y + swash_x] ))
-((current_swash)) && color_fg=$t_color || color_bg=$t_color
+(( t_color = color_swatch[18 * swatch_y + swatch_x] ))
+((current_swatch)) && color_fg=$t_color || color_bg=$t_color
 
 [[ $mode == change ]] &&  mcolors_c[mcolors_index]="48;5;$color_bg;38;5;$color_fg"
 }
@@ -266,30 +266,30 @@ overlay_text()
 (( ${#pane_lines[@]} )) || <$fs/cut_0 readarray -t pane_lines 
 (( ${#swatch_lines[@]} )) || <$fs/cut_1 readarray -t swatch_lines 
 
-((swash_pane_x = pane_columns[0] + 1))
+((swatch_pane_x = pane_columns[0] + 1))
 
 [[ $mode == normal || $mode == change ]] && 
 	{ color="48;5;$color_bg;38;5;$color_fg" ; rcolor="48;5;$color_fg;38;5;$color_bg" ; }
 
 [[ $mode == pick ]] && color=$color_pick
 
-echo -en "\e[1;${swash_pane_x}H\e[${color}m                  "
-echo -en "\e[2;${swash_pane_x}H\e[${color}m   Lorem  Ipsum   "
-echo -en "\e[3;${swash_pane_x}H\e[${color}m                  "
+echo -en "\e[1;${swatch_pane_x}H\e[${color}m                  "
+echo -en "\e[2;${swatch_pane_x}H\e[${color}m   Lorem  Ipsum   "
+echo -en "\e[3;${swatch_pane_x}H\e[${color}m                  "
 
 for i in {0..3} ; do
-	echo -en "\e[$((5 + i));${swash_pane_x}H\e[${mcolors[i]}m   Lorem \e[${mcolors_c[i]}m Ipsum   $RESET"
+	echo -en "\e[$((5 + i));${swatch_pane_x}H\e[${mcolors[i]}m   Lorem \e[${mcolors_c[i]}m Ipsum   $RESET"
 done
 
 [[ $mode == normal || $mode == change ]] &&
 	{
-	((color_swash_y = 10 + swash_y , color_swash_x = swash_pane_x + swash_x))
-	echo -en "\e[$color_swash_y;${color_swash_x}H${RESET}X"
+	((color_swatch_y = 10 + swatch_y , color_swatch_x = swatch_pane_x + swatch_x))
+	echo -en "\e[$color_swatch_y;${color_swatch_x}H${RESET}X"
 	}
 
 [[ $mode == pick ]] && echo -en "\e[$pane_0_y;${pane_0_x}H${RESET}X" 
 
-echo -en "\e[25;${swash_pane_x}H\e[38;5;240m[${color}$RESET"
+echo -en "\e[25;${swatch_pane_x}H\e[38;5;240m[${color}$RESET"
 }
 
 quit_no_output()    { restore_screen ; exit ; }
@@ -324,7 +324,7 @@ cell=0
 for (( l = 0 ; l < 15 ; l++)) ; do
 	for (( c = 0 ; c < 18 ; c++))
 		do
-			(( $1 == color_swash[$cell] )) && { echo $l:$c ; break 2 ; }
+			(( $1 == color_swatch[$cell] )) && { echo $l:$c ; break 2 ; }
 			(( cell++ ))
 		done
 done
@@ -332,20 +332,20 @@ done
 
 display_help() { clear ; tcol -h | $PAGER ; echo -en '\e[?1049h' ; stty -echo ; tput civis ; list ; }
 
-color_swash()
+color_swatch()
 {
 for i in {1..9} ; do echo ; done
 
 color_index=0
 
 for l in {0..14} ; do
-	for c in {0..17} ; do echo -en "\e[48;5;${color_swash[color_index]}m " ;  ((color_index++)) ; done
+	for c in {0..17} ; do echo -en "\e[48;5;${color_swatch[color_index]}m " ;  ((color_index++)) ; done
 	echo -e "\e[0m";
 done
 
 }
 
-color_swash=(
+color_swatch=(
 0   0   0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
 232 233 234 235 236 237 238 239 240 241 242 243 235 241 243 230 136 130
 244 245 246 247 248 249 250 251 252 253 254 255 160 168 98  32  36  100 

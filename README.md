@@ -20,16 +20,16 @@
 
 The picker consists of:
 
-- current colors swash, changed when you move the color cursor
+- current colors swatch, changed when you move the color cursor
 - 4 colors registries which you can set if you want to modify colors
-- the main color swash
+- the main color swatch
     - default system colors
     - grey scales
     - solarized colors
     - rest of available colors
 - greyed out line with color code
 
-![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_swash.png)
+![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_swatch.png)
 
 # MODES
 
@@ -43,7 +43,7 @@ The picker consists of:
 
 ## Normal mode
 
-Move the cursor in the color swash, the current color and color code are updated.
+Move the cursor in the color swatch, the current color and color code are updated.
 
 When you quite *tcol* the selected color code is displayed, you can also copy the code to the clipboard.
 
@@ -64,7 +64,7 @@ You can select a color from the left pane and put in one of the color registries
 
 - pre 'p' to get in the pick mode
 - use the movement keys to place the cursor on the color you want to change
-	- the current color swash will reflect the color you're on
+	- the current color swatch will reflect the color you're on
 - put the color in one of the modification registries with 'm[1-4]
 
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_1.png)

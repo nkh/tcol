@@ -27,9 +27,9 @@ shift # --
 options="-a --no-color --no-bindings"
 
 if [[ -z "$1" ]] ; then
-	paneless $e_options $options -c $(dirname $0)/tcol.pless -w 100% <(:) -I "1=color_swash" -w 18 <(:) "${@:2}"
+	paneless $e_options $options -c $(dirname $0)/tcol.pless -w 100% <(:) -I "1=color_swatch" -w 18 <(:) "${@:2}"
 elif [[ -f "$1" || -p "$1" ]] ; then
-	paneless $e_options $options -c $(dirname $0)/tcol.pless -w 100% "$1" -I "1=color_swash" -w 18 <(:) "${@:2}"
+	paneless $e_options $options -c $(dirname $0)/tcol.pless -w 100% "$1" -I "1=color_swatch" -w 18 <(:) "${@:2}"
 else
 	echo "tcol: input must be a file, try tcol --help" ; exit 1
 fi
