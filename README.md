@@ -97,7 +97,7 @@ You can change the colors in the color registry, the left pane will reflect the 
 - use the movement keys to select a new color
     - the color registry displays the original color and the new color
 
-Use 's[1-4]' to select a different registry to modify
+Use "'[1-4]" (quote + figure) to select a different registry to modify
 
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_2.png)
 
@@ -162,10 +162,10 @@ You can go back to normal mode with 'n' and back to modify mode with 'mm'.
 | mu            | chose from user colors             |
 | mU            | chose all from user colors         |
 | mn            | chose from named colors            |
-| s1            | select #1                          |
-| s2            | select #2                          |
-| s3            | select #3                          |
-| s4            | select #4                          |
+| '1            | select #1                          |
+| '2            | select #2                          |
+| '3            | select #3                          |
+| '4            | select #4                          |
 
 # DEPENDENCIES
 

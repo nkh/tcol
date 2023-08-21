@@ -1,9 +1,5 @@
-bug
-	tcol <(git grep --color --line-number -P 'pane' $(git rev-list HEAD) | git_grep_reformat)
-	mF + select 4 colors
-	mm
-	s2 <-
-	s3 <-
+
+small swatch
 
 bg/fg colors parsed
 	from input on the left side
