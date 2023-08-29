@@ -1,6 +1,8 @@
 
 small swatch
 
+display X11 name
+
 bg/fg colors parsed
 	from input on the left side
 	fzf input

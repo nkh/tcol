@@ -1,4 +1,6 @@
 
+tcol_pless_setup()
+{
 bind tcol	movements	j		move_down		"scroll down"
 bind tcol	movements	DOWN		move_down		"scroll down"
 bind tcol	movements	UP		move_up 		"scroll up"
@@ -7,6 +9,9 @@ bind tcol	movements	RIGHT		move_right		"move right"
 bind tcol	movements	l		move_right		"move right"
 bind tcol	movements	LEFT		move_left		"move left"
 bind tcol	movements	h		move_left		"move left"
+
+bind tcol	movements	J		move_pane_0_down	"scroll down"
+bind tcol	movements	K		move_pane_0_up		"scroll up"
 
 bind tcol	general		yy		copy_to_clipboard	"copy to clipboard"
 bind tcol	general		yq		copy_and_quit		"copy to clipboard and quit"
@@ -34,6 +39,7 @@ bind tcol	color		m1		colors_1		"color register #1"
 bind tcol	color		m2		colors_2		"color register #2"
 bind tcol	color		m3		colors_3		"color register #3"
 bind tcol	color		m4		colors_4		"color register #4"
+bind tcol	color		m5		colors_5		"color register #5"
 bind tcol	color		mc		change_color_fzf	"set change color"
 bind tcol	color		mf		color_fzf		"set modification color"
 bind tcol	color		mF		color_fzf_all		"set all modification colors"
@@ -42,38 +48,25 @@ bind tcol	color		mU		color_user_all		"chose all from user colors"
 bind tcol	color		mn		color_user_name		"chose from user colors by name"
 bind tcol	color		mN		color_user_name_all	"chose all from user colors by name"
 bind tcol	color		QUOTE		select_color		"select color registry"
+}
 
 current_swatch=1            # background color / foreground color
-swatch_x=0       swatch_y=0  # position in color swatch
-pane_0_x=1      pane_0_y=1 # position in preview pane 
+swatch_x=0       swatch_y=0 # position in color swatch
+pane_0_x=1       pane_0_y=1 # position in preview pane 
 
-color_fg=15     color_bg=0
-mcolors_index=0 mcolors=() mcolors_c=() mcolors_fg=(0 0 0 0) mcolors_bg=(0 0 0 0)
+color_fg=15      color_bg=0
+mcolors_index=0  mcolors=() mcolors_c=() 
 
 mode=normal
 
-pick_mode()      { mode=pick   ; list ; }
-normal_mode()    { mode=normal ; list ; }
-change_mode()    { mode=change ; list ; }
-alternate_mode() { [[ $mode == pick ]] && return ; [[ $mode == normal ]] && mode=change || mode=normal ; list ; }
+pick_mode()         { mode=pick   ; list ; }
+normal_mode()       { mode=normal ; list ; }
+change_mode()       { mode=change ; list ; }
+alternate_mode()    { [[ $mode == pick ]] && return ; [[ $mode == normal ]] && mode=change || mode=normal ; list ; }
 
-pick_background()
-{
-current_swatch=0
-color_pos=$(get_color_pos $color_bg)
-
-swatch_y=${color_pos%:*} swatch_x=${color_pos#*:}
-list
-}
-
-pick_foreground()
-{
-current_swatch=1
-color_pos=$(get_color_pos $color_fg)
-
-swatch_y=${color_pos%:*} swatch_x=${color_pos#*:}
-list
-}
+pick_background()   { current_swatch=0 ; set_color_pos $color_bg ; }
+pick_foreground()   { current_swatch=1 ; set_color_pos $color_fg ; }
+set_color_pos()     { color_pos=$(get_color_pos "$1") ; swatch_y=${color_pos%:*} swatch_x=${color_pos#*:} ; list ; }
 
 move_left()         { move_left_$mode ; }
 move_right()        { move_right_$mode ; }
@@ -94,6 +87,9 @@ move_left_normal()  { ((swatch_x > 0 && swatch_x--))  ; set_color ; list ; }
 move_right_normal() { ((swatch_x < 17 && swatch_x++)) ; set_color ; list ; }
 move_up_normal()    { ((swatch_y > 0 && swatch_y--))  ; set_color ; list ; }
 move_down_normal()  { ((swatch_y < 14 && swatch_y++)) ; set_color ; list ; }
+
+move_pane_0_down()  { (( top_line < max_lines && top_line++ )) ; list ; }
+move_pane_0_up()    { (( top_line > 0 && top_line--)) ; list ; }
 
 color_fzf()
 {
@@ -170,21 +166,23 @@ colors_1() { colors_reg_n 1 ; }
 colors_2() { colors_reg_n 2 ; }
 colors_3() { colors_reg_n 3 ; }
 colors_4() { colors_reg_n 4 ; }
+colors_5() { colors_reg_n 5 ; }
 
 colors_reg_n()
 {
 local register=$(($1 -1))
+mcolors_index=$register
 
-mcolors_index=$register ; mcolors[$register]=$color ; mcolors_bg[$register]=$color_bg ; mcolors_fg[$register]=$color_fg
+[[ $mode == pick ]] && mcolors[$register]="$color_pick" || mcolors[$register]="48;5;$color_bg;38;5;$color_fg"
 
 list
 }
-                                           
 
 select_color1() { mcolors_index=0 ; }
 select_color2() { mcolors_index=1 ; }
 select_color3() { mcolors_index=2 ; }
 select_color4() { mcolors_index=3 ; }
+select_color5() { mcolors_index=4 ; }
 
 restore_colors_1() { color_bg=${mcolor_bg[0]} ; color_fg=${mcolor_fg[0]} ; list ; }
 restore_colors_2() { color_bg=${mcolor_bg[1]} ; color_fg=${mcolor_fg[1]} ; list ; }
@@ -193,7 +191,9 @@ restore_colors_4() { color_bg=${mcolor_bg[3]} ; color_fg=${mcolor_fg[3]} ; list 
 
 set_color()
 {
-(( t_color = color_swatch[18 * swatch_y + swatch_x] ))
+(( c_index = (swatch_y * 18 ) + swatch_x )) 
+t_color="${fb[c_index]}"
+
 ((current_swatch)) && color_fg=$t_color || color_bg=$t_color
 
 [[ $mode == change ]] &&  mcolors_c[mcolors_index]="48;5;$color_bg;38;5;$color_fg"
@@ -206,7 +206,7 @@ use strict ; use warnings ; use Encode ;
 
 my ($color, $text_length) = (0, 0) ;
 
-for my $chunk ( split /(\e(?:\[(?:[0-9;]*)m))/, $ARGV[0])
+for my $chunk ( split /(\e(?:\[(?:[0-9;]*)m))/, $ARGV[0] )
 	{
 	if($chunk =~ /\e(\[([0-9;]*)m)/)
 		{
@@ -226,7 +226,7 @@ for my $chunk ( split /(\e(?:\[(?:[0-9;]*)m))/, $ARGV[0])
 print "$color\n"
 EOC
 
-color_pick="$(perl -e "$ansi_extract_perl" "${pane_lines[$(( pane_0_y - 1 ))]}" $((pane_0_x - 1)))"
+color_pick="$(perl -e "$ansi_extract_perl" "${pane_lines[$(( top_line + pane_0_y - 1 ))]}" $((pane_0_x - 1)))"
 }
 
 change_color_fzf()
@@ -244,21 +244,22 @@ overlay_line()
 {
 (( ${#pane_lines[@]} )) || <$fs/cut_0 readarray -t pane_lines 
 (( ${#swatch_lines[@]} )) || <$fs/cut_1 readarray -t swatch_lines 
+[[ "$pane_0_padding" ]] || { (( text_length = pane_columns[0] - 1 )) ; pane_0_padding="$(perl -e 'print " " x $ARGV[0]' $text_length)" ; }
+
+text="${pane_lines[$2]}"
+
+[[ "$text" ]] || { text="$pane_0_padding" ; }
 
 [[ $mode == change ]] &&
 	{
-	text="${pane_lines[$2]}"
-
-	for i in {0..3} ; do
+	for i in {0..4} ; do
 		[[ "${mcolors_c[i]}" ]] && text=${text//${mcolors[i]}/${mcolors_c[i]}}
 	done
-
-	echo -en "\e[$1;0H" ; echo -n "$text$PANELESS_GLYPH│$RESET${swatch_lines[$2]}"
-
-	return 0
 	}
 
-return 1
+echo -en "\e[$1;0H" ; echo -n "$text$PANELESS_GLYPH│$RESET${swatch_lines[$(($1 -1))]}"
+
+return 0
 }
 
 overlay_text()
@@ -277,19 +278,26 @@ echo -en "\e[1;${swatch_pane_x}H\e[${color}m                  "
 echo -en "\e[2;${swatch_pane_x}H\e[${color}m   Lorem  Ipsum   "
 echo -en "\e[3;${swatch_pane_x}H\e[${color}m                  "
 
-for i in {0..3} ; do
-	echo -en "\e[$((5 + i));${swatch_pane_x}H\e[${mcolors[i]}m   Lorem \e[${mcolors_c[i]}m Ipsum   $RESET"
+for i in {0..4} ; do
+	echo -en "\e[$((5 + i));${swatch_pane_x}H$RESET\e[${mcolors[i]}m   Lorem \e[${mcolors_c[i]}m Ipsum   $RESET"
 done
+
+(( swatch_y % 2 )) && { (( c_index = (swatch_y * 18 ) + swatch_x, bg_index = c_index - 18 )) ; cursor="▄" ; } || \
+		      { (( c_index = (swatch_y * 18 ) + swatch_x, bg_index = c_index + 18 )) ; cursor="▀" ; }
 
 [[ $mode == normal || $mode == change ]] &&
 	{
-	((color_swatch_y = 10 + swatch_y , color_swatch_x = swatch_pane_x + swatch_x))
-	echo -en "\e[$color_swatch_y;${color_swatch_x}H${RESET}X"
+	(( color_swatch_y = 11 + (swatch_y / 2), color_swatch_x = swatch_pane_x + swatch_x ))
+	
+	echo -en "\e[$color_swatch_y;${color_swatch_x}H\e[38;5;0;48;5;${fb[bg_index]}m$cursor\e[m"
 	}
 
 [[ $mode == pick ]] && echo -en "\e[$pane_0_y;${pane_0_x}H${RESET}X" 
 
-echo -en "\e[25;${swatch_pane_x}H\e[38;5;240m[${color}$RESET"
+color="${fb[c_index]}"
+
+echo -en "\e[19;${swatch_pane_x}H\e[38;5;240m[48;5;$color_bg;38;5;$color_fg$RESET"
+echo -en "\e[20;${swatch_pane_x}H\e[38;5;240m${x11_colors[$color]}$RESET"
 }
 
 quit_no_output()    { restore_screen ; exit ; }
@@ -297,16 +305,14 @@ quit()              { restore_screen ; display_colors ; exit ;}
 copy_and_quit()     { copy_to_clipboard ; quit_no_output ; }
 copy_to_clipboard() { echo -n "${color}" | xsel -i -b -p -s ; }
 
-
 display_colors()
 {
-
 [[ "${e[--oc]}" ]] && copy_to_clipboard
 
 [[ -z "${e[--no-color-output]}" ]] && 
 	{
 	echo -e "\e[${color}m${color}$RESET"
-
+	
 	for i in {0..3} ; do
 		[[ "${mcolors[i]}" ]] && 
 			{
@@ -320,12 +326,12 @@ display_colors()
 
 get_color_pos()
 {
-cell=0
 for (( l = 0 ; l < 15 ; l++)) ; do
 	for (( c = 0 ; c < 18 ; c++))
 		do
-			(( $1 == color_swatch[$cell] )) && { echo $l:$c ; break 2 ; }
-			(( cell++ ))
+			(( c_index = (swatch_y * 18 ) + swatch_x )) 
+			
+			(( $1 == fb[$c_index] )) && { echo $l:$c ; break 2 ; }
 		done
 done
 }
@@ -334,34 +340,105 @@ display_help() { clear ; tcol -h | $PAGER ; echo -en '\e[?1049h' ; stty -echo ; 
 
 color_swatch()
 {
-for i in {1..9} ; do echo ; done
+for l in {0..9} ; do echo ; done
 
-color_index=0
-
-for l in {0..14} ; do
-	for c in {0..17} ; do echo -en "\e[48;5;${color_swatch[color_index]}m " ;  ((color_index++)) ; done
+for l in {0..7} ; do
+	for c in {0..17} ; do 
+		(( fg = l * 36 + c , bg = fg + 18 ))
+		echo -en "\e[48;5;${fb[bg]}m\e[38;5;${fb[fg]}m▀"
+	done
+	
 	echo -e "\e[0m";
 done
-
 }
 
-color_swatch=(
+fb=(
 0   0   0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
-232 233 234 235 236 237 238 239 240 241 242 243 235 241 243 230 136 130
 244 245 246 247 248 249 250 251 252 253 254 255 160 168 98  32  36  100 
-16  17  18  52  53  54  88  89  90  124 125 126 160 161 162 196 197 198
-22  23  24  58  59  60  94  95  96  130 131 132 166 167 168 202 203 204
-28  29  30  64  65  66  100 101 102 136 137 138 172 173 174 208 209 210
-34  35  36  70  71  72  106 107 108 142 143 144 178 179 180 214 215 216
-40  41  42  76  77  78  112 113 114 148 149 150 184 185 186 220 221 222
+232 233 234 235 236 237 238 239 240 241 242 243 235 241 243 230 136 130
 46  47  48  82  83  84  118 119 120 154 155 156 190 191 192 226 227 228
+40  41  42  76  77  78  112 113 114 148 149 150 184 185 186 220 221 222
+34  35  36  70  71  72  106 107 108 142 143 144 178 179 180 214 215 216
+28  29  30  64  65  66  100 101 102 136 137 138 172 173 174 208 209 210
+22  23  24  58  59  60  94  95  96  130 131 132 166 167 168 202 203 204
+16  17  18  52  53  54  88  89  90  124 125 126 160 161 162 196 197 198
 19  20  21  55  56  57  91  92  93  127 128 129 163 164 165 199 200 201
 25  26  27  61  62  63  97  98  99  133 134 135 169 170 171 205 206 207
 31  32  33  67  68  69  103 104 105 139 140 141 175 176 177 211 212 213
 37  38  39  73  74  75  109 110 111 145 146 147 181 182 183 217 218 219
 43  44  45  79  80  81  115 116 117 151 152 153 187 188 189 223 224 225
 49  50  51  85  86  87  121 122 123 157 158 159 193 194 195 229 230 231
+0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
 )
 
-# vim: set ft=bash:
+x11_colors=(
+Black			Maroon			Green			Olive
+Navy			Purple			Teal			Silver
+Grey			Red			Lime			Yellow
+Blue			Fuchsia			Aqua			White
+Grey0			NavyBlue		DarkBlue		Blue3
+Blue3			Blue1			DarkGreen		DeepSkyBlue4
+DeepSkyBlue4		DeepSkyBlue4		DodgerBlue3		DodgerBlue2
+Green4			SpringGreen4		Turquoise4		DeepSkyBlue3
+DeepSkyBlue3		DodgerBlue1		Green3			SpringGreen3
+DarkCyan		LightSeaGreen		DeepSkyBlue2		DeepSkyBlue1
+Green3			SpringGreen3		SpringGreen2		Cyan3
+DarkTurquoise		Turquoise2		Green1			SpringGreen2
+SpringGreen1		MediumSpringGreen	Cyan2			Cyan1
+DarkRed			DeepPink4		Purple4			Purple4
+Purple3			BlueViolet		Orange4			Grey37
+MediumPurple4		SlateBlue3		SlateBlue3		RoyalBlue1
+Chartreuse4		DarkSeaGreen4		PaleTurquoise4		SteelBlue
+SteelBlue3		CornflowerBlue		Chartreuse3		DarkSeaGreen4
+CadetBlue		CadetBlue		SkyBlue3		SteelBlue1
+Chartreuse3		PaleGreen3		SeaGreen3		Aquamarine3
+MediumTurquoise		SteelBlue1		Chartreuse2		SeaGreen2
+SeaGreen1		SeaGreen1		Aquamarine1		DarkSlateGray2
+DarkRed			DeepPink4		DarkMagenta		DarkMagenta
+DarkViolet		Purple			Orange4			LightPink4
+Plum4			MediumPurple3		MediumPurple3		SlateBlue1
+Yellow4			Wheat4			Grey53			LightSlateGrey
+MediumPurple		LightSlateBlue		Yellow4			DarkOliveGreen3
+DarkSeaGreen		LightSkyBlue3		LightSkyBlue3		SkyBlue2
+Chartreuse2		DarkOliveGreen3		PaleGreen3		DarkSeaGreen3
+DarkSlateGray3		SkyBlue1		Chartreuse1		LightGreen
+LightGreen		PaleGreen1		Aquamarine1		DarkSlateGray1
+Red3			DeepPink4		MediumVioletRed		Magenta3
+DarkViolet		Purple			DarkOrange3		IndianRed
+HotPink3		MediumOrchid3		MediumOrchid		MediumPurple2
+DarkGoldenrod		LightSalmon3		RosyBrown		Grey63
+MediumPurple2		MediumPurple1		Gold3			DarkKhaki
+NavajoWhite3		Grey69			LightSteelBlue3		LightSteelBlue
+Yellow3			DarkOliveGreen3		DarkSeaGreen3		DarkSeaGreen2
+LightCyan3		LightSkyBlue1		GreenYellow		DarkOliveGreen2
+PaleGreen1		DarkSeaGreen2		DarkSeaGreen1		PaleTurquoise1
+Red3			DeepPink3		DeepPink3		Magenta3
+Magenta3		Magenta2		DarkOrange3		IndianRed
+HotPink3		HotPink2		Orchid			MediumOrchid1
+Orange3			LightSalmon3		LightPink3		Pink3
+Plum3			Violet			Gold3			LightGoldenrod3
+Tan			MistyRose3		Thistle3		Plum2
+Yellow3			Khaki3			LightGoldenrod2		LightYellow3
+Grey84			LightSteelBlue1		Yellow2			DarkOliveGreen1
+DarkOliveGreen1		DarkSeaGreen1		Honeydew2		LightCyan1
+Red1			DeepPink2		DeepPink1		DeepPink1
+Magenta2		Magenta1		OrangeRed1		IndianRed1
+IndianRed1		HotPink			HotPink			MediumOrchid1
+DarkOrange		Salmon1			LightCoral		PaleVioletRed1
+Orchid2			Orchid1			Orange1			SandyBrown
+LightSalmon1		LightPink1		Pink1			Plum1
+Gold1			LightGoldenrod2		LightGoldenrod2		NavajoWhite1
+MistyRose1		Thistle1		Yellow1			LightGoldenrod1
+Khaki1			Wheat1			Cornsilk1		Grey100
+Grey3			Grey7			Grey11			Grey15
+Grey19			Grey23			Grey27			Grey30
+Grey35			Grey39			Grey42			Grey46
+Grey50			Grey54			Grey58			Grey62
+Grey66			Grey70			Grey74			Grey78
+Grey82			Grey85			Grey89			Grey93
+)
+
+tcol_pless_setup
+
+# vim: ft=bash: 
 

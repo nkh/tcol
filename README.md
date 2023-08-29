@@ -121,6 +121,8 @@ You can go back to normal mode with 'n' and back to modify mode with 'mm'.
 | l             | move right                         |
 | LEFT          | move left                          |
 | h             | move left                          |
+| J             | scroll pane 0 down                 |
+| K             | scroll pane 0 up                   |
 
 | binding       | tcol                               |
 | -------       | ---------------------------------- |
@@ -152,20 +154,21 @@ You can go back to normal mode with 'n' and back to modify mode with 'mm'.
 
 | binding       | modification mode                  |
 | -------       | ---------------------------------- |
+| '1            | select #1                          |
+| '2            | select #2                          |
+| '3            | select #3                          |
+| '4            | select #4                          |
 | m1            | save #1                            |
 | m2            | save #2                            |
 | m3            | save #3                            |
 | m4            | save #4                            |
+| m5            | save #5                            |
 | mc            | set change color                   |
 | mf            | set modification color             |
 | mF            | set all modification colors        |
 | mu            | chose from user colors             |
 | mU            | chose all from user colors         |
 | mn            | chose from named colors            |
-| '1            | select #1                          |
-| '2            | select #2                          |
-| '3            | select #3                          |
-| '4            | select #4                          |
 
 # DEPENDENCIES
 
