@@ -296,14 +296,14 @@ done
 
 color="${fb[c_index]}"
 
-echo -en "\e[19;${swatch_pane_x}H\e[38;5;240m[48;5;$color_bg;38;5;$color_fg$RESET"
-echo -en "\e[20;${swatch_pane_x}H\e[38;5;240m${x11_colors[$color]}$RESET"
+echo -en "\e[19;${swatch_pane_x}H\e[K\e[38;5;240m[48;5;$color_bg;38;5;$color_fg$RESET"
+echo -en "\e[20;${swatch_pane_x}H\e[K\e[38;5;240m${x11_colors[$color]}$RESET"
 }
 
-quit_no_output()    { restore_screen ; exit ; }
-quit()              { restore_screen ; display_colors ; exit ;}
+quit_no_output()    { restore_screen ; exit 0 ; }
+quit()              { restore_screen ; display_colors ; exit 0 ; }
 copy_and_quit()     { copy_to_clipboard ; quit_no_output ; }
-copy_to_clipboard() { echo -n "${color}" | xsel -i -b -p -s ; }
+copy_to_clipboard() { echo -n "48;5;$color_bg;38;5;$color_fg" | xsel -i -b -p -s ; }
 
 display_colors()
 {
@@ -311,7 +311,7 @@ display_colors()
 
 [[ -z "${e[--no-color-output]}" ]] && 
 	{
-	echo -e "\e[${color}m${color}$RESET"
+	echo -e "\e[${RESET}48;5;$color_bg;38;5;$color_fg\t${x11_colors[$color]}"
 	
 	for i in {0..3} ; do
 		[[ "${mcolors[i]}" ]] && 

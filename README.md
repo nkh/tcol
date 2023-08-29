@@ -29,8 +29,6 @@ The picker consists of:
     - rest of available colors
 - greyed out line with color code
 
-![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_swatch.png)
-
 # MODES
 
 *tcol* had three modes of operation:
@@ -62,10 +60,10 @@ If you pass a file to *tcol*, the file will be displayed in the left pane.
 
 You can select a color from the left pane and put in one of the color registries.
 
-- pre 'p' to get in the pick mode
+- press 'p' to get in the pick mode
 - use the movement keys to place the cursor on the color you want to change
 	- the current color swatch will reflect the color you're on
-- put the color in one of the modification registries with 'm[1-4]
+- put the color in one of the modification registries with 'm[1-5]
 
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_1.png)
 
@@ -97,7 +95,7 @@ You can change the colors in the color registry, the left pane will reflect the 
 - use the movement keys to select a new color
     - the color registry displays the original color and the new color
 
-Use "'[1-4]" (quote + figure) to select a different registry to modify
+Use "'[1-5]" (quote + figure) to select a different registry to modify
 
 ![TUI](https://github.com/nkh/tcol/blob/main/media/tcol_2.png)
 
